@@ -1,10 +1,9 @@
+const oracledb = require("oracledb");
 const credentials = require("./credentials");
 
-let result;
-
-async function exec(oracledb, command) {
+async function query(command) {
+  let result;
   let connection;
-  console.log(credentials);
   try {
     connection = await oracledb.getConnection(credentials);
     result = await connection.execute(command);
@@ -22,4 +21,4 @@ async function exec(oracledb, command) {
   }
 }
 
-exports.exec = exec;
+module.exports.query = query;

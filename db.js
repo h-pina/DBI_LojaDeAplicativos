@@ -1,6 +1,9 @@
 const oracledb = require("oracledb");
 const credentials = require("./credentials");
 
+const express = require(`express`);
+const router = express.Router();
+
 async function query(command) {
   let result;
   let connection;

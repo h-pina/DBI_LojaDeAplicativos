@@ -4,6 +4,7 @@ require("dotenv").config();
 const express = require("express");
 const oracledb = require("oracledb");
 oracledb.initOracleClient({ libDir: process.env.LIBDIR });
+oracledb.autoCommit = true;
 
 const appsRoutes = require(`./routes/apps`);
 const purchasesRoutes = require(`./routes/purchases`);
@@ -22,9 +23,10 @@ app.use(function (req, res, next) {
   next();
 });
 
+app.use(express.json());
 app.use(`/apps`, appsRoutes); //Base URL definitions for differente routes
-/*app.use(`/purchases`, purchasesRoutes);
-app.use(`/reviews`, reviewsRoutes);*/
+app.use(`/purchases`, purchasesRoutes);
+app.use(`/reviews`, reviewsRoutes);
 app.use(`/users`, usersRoutes);
 
 app.listen(port, () => {

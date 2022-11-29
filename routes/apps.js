@@ -1,6 +1,7 @@
 const express = require(`express`);
 const router = express.Router();
 const db = require(`../db.js`);
+const utils = require("../utils.js");
 
 //Basic get Route Model
 router.get(`/listAllApps`, async function (req, res) {
@@ -36,29 +37,78 @@ router.get(`/getAppFullInfo/:appId`, async function (req, res) {
     );
 
     let reviewsList = await db.query(
-      `SELECT * from avaliacao WHERE id_app=${req.params.appId} `
+      `SELECT av.id_user, u.nome, av.nota FROM usuario u join avaliacao av on u.id_user = av.id_user WHERE av.id_app=${req.params.appId} `
     );
 
-    console.log(mainQuery.rows);
-    console.log(reviewsList.rows);
+    let revList = [];
+    reviewsList.rows.forEach((review) => {
+      revList.push({
+        id: review[0],
+        usuario: review[1],
+        nota: review[2],
+      });
+    });
 
     let resObj = {};
     resObj["app"] = [];
 
-    //let reviewsList = ;
+    let data = mainQuery.rows[0];
 
     let appInfo = {
-      id: mainQuery[0][0],
-      id_empresa: mainQuery[0][1],
-      nome: mainQuery[0][2],
-      nome_empresa: mainQuery[0][3],
-      descricao: mainQuery[0][4],
-      versao: mainQuery[0][5],
-      reviews: reviewsList,
-      preco: mainQuery[0][6],
+      id: data[0],
+      id_empresa: data[1],
+      nome: data[2],
+      nome_empresa: data[3],
+      descricao: data[4],
+      versao: data[5],
+      reviews: revList,
+      preco: data[6],
     };
-    resObj["app"].push(newApp);
-    //res.json(resObj);
+    resObj["app"].push(appInfo);
+
+    res.json(resObj);
+  } catch (error) {
+    console.log("_Error: " + error.message);
+  }
+});
+
+router.post(`/addNewApp`, async function (req, res) {
+  try {
+    let parameters = req.body.data;
+    //(id_compra, id_app, id_user, data_compra, valor)
+    let lastAppId = await db.query(`SELECT MAX(id_app) from aplicativo`);
+    let newAppId = utils.pad(parseInt(lastAppId.rows[0]) + 1, 10).toString();
+    let queryRes = await db.query(
+      `INSERT INTO aplicativo VALUES ('${newAppId}', '${parameters.id_empresa}', '${parameters.nome}', '${parameters.descricao}',  ${parameters.versao}, ${parameters.valor})`
+    );
+    if (queryRes) {
+      res.send(true);
+    } else {
+      res.send(false);
+    }
+  } catch (error) {
+    console.log("_Error: " + error.message);
+  }
+});
+
+router.delete(`/deleteApp/:appId/`, async function (req, res) {
+  try {
+    let queryResult = await db.query(
+      `DELETE FROM aplicativo WHERE id_app=${req.params.appId}`
+    );
+    if (queryResult.rowsAffected > 0) {
+      res.send(true);
+    } else {
+      res.send(false);
+    }
+  } catch (error) {
+    console.log("_Error: " + error.message);
+  }
+});
+
+//TODO
+router.put(`/editAppInfo/:appId/`, async function (req, res) {
+  try {
   } catch (error) {
     console.log("_Error: " + error.message);
   }

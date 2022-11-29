@@ -12,6 +12,8 @@ async function query(command) {
     result = await connection.execute(command);
   } catch (err) {
     console.error(err);
+    await connection.close();
+    return false;
   } finally {
     if (connection) {
       try {

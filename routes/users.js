@@ -14,14 +14,11 @@ router.get(`/listAllUsers`, async function (req, res) {
       let newUser = {
         id: user[0],
         name: user[1],
-        balance: user[2],
       };
       resObj["users"].push(newUser);
     });
 
-    console.log(resObj);
-
-    res.send(resObj);
+    res.json(resObj);
   } catch (error) {
     console.log("_Error: " + error.message);
   }

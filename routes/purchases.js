@@ -8,7 +8,7 @@ const utils = require("../utils.js");
 router.get(`/getUserPurchases/:userid`, async function (req, res) {
   try {
     let queryResult = await db.query(
-      `SELECT a.nome, a.valor, c.data_compra FROM compra c join aplicativo a on c.id_app=a.id_app WHERE id_user=${req.params.userid}`
+      `SELECT a.nome, a.valor, c.data_compra FROM compra c join aplicativo a on c.id_app=a.id_app WHERE id_user=${req.params.userid} ORDER BY c.data_compra  `
     );
 
     let resObj = {};
@@ -55,6 +55,21 @@ router.get(`/isAppPurchased/:userId/:appId`, async function (req, res) {
     );
     if (checkIfPurchased.rows.length > 0) {
       res.send(true);
+    } else {
+      res.send(false);
+    }
+  } catch (error) {
+    console.log("_Error: " + error.message);
+  }
+});
+
+router.get(`/getPurchaseId/:userId/:appId`, async function (req, res) {
+  try {
+    let checkIfPurchased = await db.query(
+      `SELECT id_compra from compra where id_user=${req.params.userId} AND id_app=${req.params.appId} `
+    );
+    if (checkIfPurchased.rows.length > 0) {
+      res.send(checkIfPurchased.rows[0]);
     } else {
       res.send(false);
     }

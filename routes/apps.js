@@ -93,8 +93,13 @@ router.post(`/addNewApp`, async function (req, res) {
 
 router.delete(`/deleteApp/:appId/`, async function (req, res) {
   try {
+    console.log(
+      `DELETE FROM aplicativo WHERE id_app='${req.params.appId}' cascade constraints`
+    );
+    await db.query(`DELETE FROM compra WHERE id_app='${req.params.appId}'`);
+    await db.query(`DELETE FROM avaliacao WHERE id_app='${req.params.appId}'`);
     let queryResult = await db.query(
-      `DELETE FROM aplicativo WHERE id_app=${req.params.appId}`
+      `DELETE FROM aplicativo WHERE id_app='${req.params.appId}'`
     );
     if (queryResult.rowsAffected > 0) {
       res.send(true);
@@ -106,9 +111,18 @@ router.delete(`/deleteApp/:appId/`, async function (req, res) {
   }
 });
 
-//TODO
-router.put(`/editAppInfo/:appId/`, async function (req, res) {
+router.put(`/editAppInfo`, async function (req, res) {
   try {
+    let parameters = req.body;
+    console.log(parameters);
+    let queryResult = await db.query(
+      `UPDATE aplicativo SET id_empresa='${parameters.id_empresa}', nome='${parameters.nome}',descricao='${parameters.descricao}',versao=${parameters.versao},valor=${parameters.preco} WHERE id_app='${parameters.id}'`
+    );
+    if (queryResult.rowsAffected > 0) {
+      res.send(true);
+    } else {
+      res.send(false);
+    }
   } catch (error) {
     console.log("_Error: " + error.message);
   }

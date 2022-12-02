@@ -4,12 +4,12 @@ const db = require(`../db.js`);
 const utils = require("../utils.js");
 
 //Basic get Route Model
-//(id_compra, id_app, id_user, data_compra, valor)
 
-router.get(`/getUserPurchases/:userid`, async function (req, res) {
+//(id_compra, id_app, id_user, data_compra, valor)
+router.get(`/getUserPurchases/:id`, async function (req, res) {
   try {
     let queryResult = await db.query(
-      `SELECT a.nome, a.valor, c.data_compra FROM compra c join aplicativo a on c.id_app=a.id WHERE id_user=${req.params.userid} ORDER BY c.data_compra  `
+      `SELECT a.nome, a.valor, c.data_compra, c.id_user, c.id FROM compra c join aplicativo a on c.id_app=a.id WHERE id_user=${req.params.id} ORDER BY c.data_compra  `
     );
 
     let resObj = {};
@@ -18,12 +18,13 @@ router.get(`/getUserPurchases/:userid`, async function (req, res) {
     queryResult.rows.forEach((purchases) => {
       let newApp = {
         nome: purchases[0],
-        preco: purchases[1],
+        valor: purchases[1],
         data_compra: purchases[2],
+        id_user: purchases[3],
+        id: purchases[4]
       };
       resObj["purchases"].push(newApp);
     });
-    console.log(resObj);
     res.json(resObj);
   } catch (error) {
     console.log("_Error: " + error.message);
@@ -71,6 +72,63 @@ router.get(`/getPurchaseId/:userId/:appId`, async function (req, res) {
     );
     if (checkIfPurchased.rows.length > 0) {
       res.send(checkIfPurchased.rows[0]);
+    } else {
+      res.send(false);
+    }
+  } catch (error) {
+    console.log("_Error: " + error.message);
+  }
+});
+
+router.post(`/addPurchase`, async function (req, res) {
+  try {
+    let parameters = req.body.data;
+    console.log(
+      parameters
+    );
+    //(id_compra, id_app, id_user, data_compra, valor)
+    let queryRes = await db.query(
+      `INSERT INTO compra(id_app, id_user, data_compra, valor) VALUES(${parseInt(parameters.id_app)}, ${parseInt(parameters.id_user)}, TO_DATE('${parameters.data_compra}', 'DD/MM/YYYY'), ${parseInt(parameters.valor)}.00)`
+    );
+    if (queryRes) {
+      res.send(true);
+    } else {
+      res.send(false);
+    }
+  } catch (error) {
+    console.log("_Error: " + error.message);
+  }
+});
+
+router.put(`/editPurchase/:id`, async function (req, res) {
+  try {
+    console.log(req.body)
+    let parameters = req.body;
+
+    //(id, nome)
+    console.log(`UPDATE compra SET id_app=${parseInt(parameters.id_app)}, id_user=${parseInt(parameters.id_user)}, data_compra=TO_DATE('${parameters.data_compra}', 'DD/MM/YYYY'), valor=${parseInt(parameters.valor)}.00) WHERE id=${parseInt(parameters.id)}`)
+    let queryRes = await db.query(
+      `UPDATE compra SET id_app=${parseInt(parameters.id_app)}, id_user=${parseInt(parameters.id_user)}, data_compra=TO_DATE('${parameters.data_compra}', 'DD/MM/YYYY'), valor=${parseInt(parameters.valor)}.00 WHERE id=${parseInt(parameters.id)}`
+    );
+
+    if (queryRes) {
+      res.send(true);
+    } else {
+      res.send(false);
+    }
+  } catch (error) {
+    console.log("_Error: " + error.message);
+  }
+});
+
+router.delete(`/deletePurchase/:id/`, async function (req, res) {
+  try {
+    let queryResult = await db.query(
+      `DELETE FROM compra WHERE id='${req.params.id}'`
+    );
+
+    if (queryResult.rowsAffected > 0) {
+      res.send(true);
     } else {
       res.send(false);
     }

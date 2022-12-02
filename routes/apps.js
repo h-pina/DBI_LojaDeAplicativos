@@ -7,7 +7,7 @@ const utils = require("../utils.js");
 router.get(`/listAllApps`, async function (req, res) {
   try {
     let queryResult = await db.query(
-      "SELECT a.id, a.id_empresa, a.nome, e.nome nome_empresa, a.valor, a.descricao FROM aplicativo a join empresa e on a.id_empresa = e.id"
+      "SELECT a.id, a.id_empresa, a.nome, e.nome nome_empresa, a.valor, a.descricao, a.versao FROM aplicativo a join empresa e on a.id_empresa = e.id"
     );
 
     let resObj = {};
@@ -20,8 +20,9 @@ router.get(`/listAllApps`, async function (req, res) {
         id_empresa: app[1],
         nome: app[2],
         nome_empresa: app[3],
-        preco: app[4],
+        valor: app[4],
         descricao: app[5],
+        versao: app[6]
       };
       resObj["apps"].push(newApp);
     });
@@ -76,12 +77,12 @@ router.get(`/getAppFullInfo/:appId`, async function (req, res) {
 router.post(`/addNewApp`, async function (req, res) {
   try {
     let parameters = req.body.data;
-    //(id_compra, id_app, id_user, data_compra, valor)
-    let lastAppId = await db.query(`SELECT MAX(id_app) from aplicativo`);
-    let newAppId = utils.pad(parseInt(lastAppId.rows[0]) + 1, 10).toString();
+
+    //(id, id_empresa, nome, descricao, versao, valor)
     let queryRes = await db.query(
-      `INSERT INTO aplicativo VALUES ('${newAppId}', '${parameters.id_empresa}', '${parameters.nome}', '${parameters.descricao}',  ${parameters.versao}, ${parameters.valor})`
+      `INSERT INTO aplicativo(id_empresa, nome, descricao, versao, valor) VALUES(${parseInt(parameters.id_empresa)}, '${parameters.nome}', '${parameters.descricao}', ${parseInt(parameters.versao)}, ${parseInt(parameters.valor)}.00)`
     );
+
     if (queryRes) {
       res.send(true);
     } else {
@@ -92,16 +93,15 @@ router.post(`/addNewApp`, async function (req, res) {
   }
 });
 
-router.delete(`/deleteApp/:appId/`, async function (req, res) {
+router.delete(`/deleteApp/:id/`, async function (req, res) {
   try {
-    console.log(
-      `DELETE FROM aplicativo WHERE id_app='${req.params.appId}' cascade constraints`
-    );
-    await db.query(`DELETE FROM compra WHERE id_app='${req.params.appId}'`);
-    await db.query(`DELETE FROM avaliacao WHERE id_app='${req.params.appId}'`);
+    await db.query(`DELETE FROM compra WHERE id_app='${req.params.id}'`);
+    await db.query(`DELETE FROM avaliacao WHERE id_app='${req.params.id}'`);
+
     let queryResult = await db.query(
-      `DELETE FROM aplicativo WHERE id_app='${req.params.appId}'`
+      `DELETE FROM aplicativo WHERE id='${req.params.id}'`
     );
+    
     if (queryResult.rowsAffected > 0) {
       res.send(true);
     } else {
@@ -112,12 +112,12 @@ router.delete(`/deleteApp/:appId/`, async function (req, res) {
   }
 });
 
-router.put(`/editAppInfo`, async function (req, res) {
+router.put(`/editAppInfo/:id`, async function (req, res) {
   try {
     let parameters = req.body;
     console.log(parameters);
     let queryResult = await db.query(
-      `UPDATE aplicativo SET id_empresa='${parameters.id_empresa}', nome='${parameters.nome}',descricao='${parameters.descricao}',versao=${parameters.versao},valor=${parameters.preco} WHERE id_app='${parameters.id}'`
+      `UPDATE aplicativo SET id_empresa=${parseInt(parameters.id_empresa)}, nome='${parameters.nome}', descricao='${parameters.descricao}', versao=${parseInt(parameters.versao)}, valor=${parseInt(parameters.valor)}.00 WHERE id=${parameters.id}`
     );
     if (queryResult.rowsAffected > 0) {
       res.send(true);

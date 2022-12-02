@@ -5,10 +5,11 @@ const utils = require("../utils.js");
 
 //Basic get Route Model
 //(id_compra, id_app, id_user, data_compra, valor)
+
 router.get(`/getUserPurchases/:userid`, async function (req, res) {
   try {
     let queryResult = await db.query(
-      `SELECT a.nome, a.valor, c.data_compra FROM compra c join aplicativo a on c.id_app=a.id_app WHERE id_user=${req.params.userid} ORDER BY c.data_compra  `
+      `SELECT a.nome, a.valor, c.data_compra FROM compra c join aplicativo a on c.id_app=a.id WHERE id_user=${req.params.userid} ORDER BY c.data_compra  `
     );
 
     let resObj = {};

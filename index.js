@@ -10,6 +10,7 @@ const appsRoutes = require(`./routes/apps`);
 const purchasesRoutes = require(`./routes/purchases`);
 const reviewsRoutes = require(`./routes/reviews`);
 const usersRoutes = require(`./routes/users`);
+const companiesRoutes = require(`./routes/companies`);
 
 const app = express();
 const port = 5000;
@@ -29,6 +30,7 @@ app.use(`/apps`, appsRoutes); //Base URL definitions for differente routes
 app.use(`/purchases`, purchasesRoutes);
 app.use(`/reviews`, reviewsRoutes);
 app.use(`/users`, usersRoutes);
+app.use(`/companies`, companiesRoutes);
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);

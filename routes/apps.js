@@ -7,7 +7,7 @@ const utils = require("../utils.js");
 router.get(`/listAllApps`, async function (req, res) {
   try {
     let queryResult = await db.query(
-      "SELECT a.id_app, a.id_empresa, a.nome, e.nome nome_empresa, a.valor FROM aplicativo a join empresa e on a.id_empresa = e.id_empresa"
+      "SELECT a.id, a.id_empresa, a.nome, e.nome nome_empresa, a.valor, a.descricao FROM aplicativo a join empresa e on a.id_empresa = e.id"
     );
 
     let resObj = {};
@@ -21,6 +21,7 @@ router.get(`/listAllApps`, async function (req, res) {
         nome: app[2],
         nome_empresa: app[3],
         preco: app[4],
+        descricao: app[5],
       };
       resObj["apps"].push(newApp);
     });

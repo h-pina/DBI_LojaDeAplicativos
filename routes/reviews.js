@@ -42,7 +42,7 @@ router.get(`/isAppReviewed/:userId/:appId`, async function (req, res) {
 // (id, id_app, id_user, id_compra, nota)
 router.get(`/listReview`, async function (req, res) {
   try {
-    let queryResult = await db.query("SELECT * from avaliacao");
+    let queryResult = await db.query(`SELECT a.id, a.id_app, a.id_user, a.id_compra, a.nota, p.nome FROM avaliacao a join aplicativo p on a.id_app = p.id`);
 
     let resObj = {};
     resObj["avaliacao"] = [];
@@ -54,6 +54,7 @@ router.get(`/listReview`, async function (req, res) {
         id_user: avaliacao[2],
         id_compra: avaliacao[3],
         nota: avaliacao[4],
+        nome_app: avaliacao[5]
       };
       resObj["avaliacao"].push(newAvaliacao);
     });
